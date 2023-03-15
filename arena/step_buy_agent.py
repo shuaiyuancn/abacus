@@ -11,13 +11,36 @@ class StepBuyAgent(BaseAgent):
         self.buy_size = buy_size
 
     def trade(self, data: StockData):
+        super().trade(data)
+
         if self.current_interval == self.interval_in_days:
-            if self.money_available > self.buy_size:
-                self.money_available -= self.buy_size
-                self.holding += self.buy_size / data.open_price
-                self.current_interval = 0
-            else:
-                logger.warning(f"Money available {self.money_available} < buy size {self.buy_size}")
+            self.buy(self.buy_size)
+            self.current_interval = 0
         else:
             self.current_interval += 1
             
+
+class StepBuyWithStopLossAgent(StepBuyAgent):
+    def __init__(self, money_available, interval_in_days, buy_size, stop_loss_in_pct, sell_size_in_pct) -> None:
+        super().__init__(money_available, interval_in_days, buy_size)
+        self.stop_loss_in_pct = stop_loss_in_pct
+        self.stop_loss_in_money = 0.0
+        self.sell_size_in_pct = sell_size_in_pct
+
+    def set_stop_loss(self):
+        self.stop_loss_in_money = self.avg_price * (1 - self.stop_loss_in_pct)
+
+    def trade(self, data: StockData):
+        super().trade(data)
+        self.set_stop_loss()
+
+        if data.open_price <= self.stop_loss_in_money:
+            self.sell(self.sell_size_in_pct)
+            # pause the current_interval
+            return
+    
+        if self.current_interval == self.interval_in_days:
+            self.buy(self.buy_size)
+            self.current_interval = 0            
+        else:
+            self.current_interval += 1

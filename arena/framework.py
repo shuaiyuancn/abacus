@@ -1,5 +1,7 @@
 import pandas as pd
 
+from logzero import logger
+
 class StockData:
     # From ChatGPT
     def __init__(self, date, open_price, high, low, close, volume):
@@ -17,6 +19,8 @@ class CsvFileReader:
         self.num_rows = len(self.df)
         self.current_row_index = 0
 
+        logger.info(f"{self.num_rows} rows loaded")
+
     def next_row(self):
         if self.current_row_index >= self.num_rows:
             return None
@@ -30,3 +34,7 @@ class CsvFileReader:
         close = row['Close']
         volume = row['Volume']
         return StockData(date, open_price, high, low, close, volume)
+
+    def reset_loc(self):
+        self.current_row_index = 0
+        
