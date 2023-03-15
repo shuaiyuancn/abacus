@@ -28,6 +28,9 @@ def convert_volume_to_float(vol):
 df['Volume'] = df['Volume'].apply(convert_volume_to_float)
 
 # %%
+df = df.sort_values(by='Date')
+
+# %%
 df.to_csv('../dataset/VEVE-processed.csv', index=None)
 
 # %%
