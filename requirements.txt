@@ -1,3 +1,6 @@
+backtrader[plotting]
 logzero
+matplotlib==3.2.2
 pandas
 tqdm
+yfinance
